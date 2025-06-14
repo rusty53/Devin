@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube to NotebookLM Workflow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #4facfe;
+            padding-bottom: 10px;
+        }
+        
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .topic-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .topic-card:hover {
+            border-color: #4facfe;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.2);
+        }
+        
+        .topic-card.selected {
+            border-color: #4facfe;
+            background: #e3f2fd;
+        }
+        
+        .topic-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .topic-card p {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .custom-topic {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .settings-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .progress-container {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 2px solid #4facfe;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .results-container {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .video-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .video-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .video-info {
+            flex: 1;
+        }
+        
+        .video-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .video-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .relevance-score {
+            background: #4facfe;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .download-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        @media (max-width: 768px) {
+            .settings-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>YouTube to NotebookLM</h1>
+            <p>Transform YouTube educational content into structured NotebookLM materials</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="section">
+                <h2>Select a Topic</h2>
+                <div class="topic-grid" id="topicGrid">
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Custom Topic</h2>
+                <div class="custom-topic">
+                    <div class="form-group">
+                        <label for="customTopicName">Topic Name</label>
+                        <input type="text" id="customTopicName" placeholder="Enter your custom topic name">
+                    </div>
+                    <div class="form-group">
+                        <label for="customKeywords">Keywords (comma-separated)</label>
+                        <textarea id="customKeywords" placeholder="Enter keywords related to your topic, separated by commas"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Settings</h2>
+                <div class="settings-panel">
+                    <div class="settings-row">
+                        <div class="form-group">
+                            <label for="maxVideos">Maximum Videos</label>
+                            <input type="number" id="maxVideos" value="12" min="5" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label for="minRelevance">Minimum Relevance Score</label>
+                            <input type="number" id="minRelevance" value="65" min="50" max="95">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section" style="text-align: center;">
+                <button class="btn" id="generateBtn" onclick="generateWorkflow()">
+                    Generate NotebookLM Materials
+                </button>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-text" id="progressText">Initializing...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressDetails"></div>
+            </div>
+            
+            <div class="results-container" id="resultsContainer">
+                <div class="section">
+                    <h2>Generated Videos</h2>
+                    <div class="video-list" id="videoList"></div>
+                </div>
+                
+                <div class="download-section">
+                    <h3>Download Generated Materials</h3>
+                    <p>Your NotebookLM materials have been generated and are ready for download.</p>
+                    <div class="download-buttons" id="downloadButtons"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTopic = null;
+        let predefinedTopics = [];
+        
+        async function loadTopics() {
+            try {
+                const response = await fetch('/api/topics');
+                predefinedTopics = await response.json();
+                renderTopics();
+            } catch (error) {
+                console.error('Error loading topics:', error);
+            }
+        }
+        
+        function renderTopics() {
+            const grid = document.getElementById('topicGrid');
+            grid.innerHTML = '';
+            
+            predefinedTopics.forEach((topic, index) => {
+                const card = document.createElement('div');
+                card.className = 'topic-card';
+                card.onclick = () => selectTopic(index);
+                card.innerHTML = `
+                    <h3>${topic.name}</h3>
+                    <p>${topic.description}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        function selectTopic(index) {
+            document.querySelectorAll('.topic-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.querySelectorAll('.topic-card')[index].classList.add('selected');
+            selectedTopic = predefinedTopics[index];
+            
+            document.getElementById('customTopicName').value = '';
+            document.getElementById('customKeywords').value = '';
+        }
+        
+        async function generateWorkflow() {
+            const customName = document.getElementById('customTopicName').value.trim();
+            const customKeywords = document.getElementById('customKeywords').value.trim();
+            
+            let topic;
+            if (customName && customKeywords) {
+                topic = {
+                    name: customName,
+                    keywords: customKeywords.split(',').map(k => k.trim())
+                };
+            } else if (selectedTopic) {
+                topic = selectedTopic;
+            } else {
+                alert('Please select a predefined topic or enter a custom topic with keywords.');
+                return;
+            }
+            
+            const maxVideos = parseInt(document.getElementById('maxVideos').value);
+            const minRelevance = parseInt(document.getElementById('minRelevance').value);
+            
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            
+            showProgress();
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        topic: topic,
+                        max_videos: maxVideos,
+                        min_relevance: minRelevance
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Generation failed');
+                }
+                
+                const result = await response.json();
+                showResults(result);
+                
+            } catch (error) {
+                console.error('Error generating workflow:', error);
+                alert('Error generating workflow. Please try again.');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate NotebookLM Materials';
+                hideProgress();
+            }
+        }
+        
+        function showProgress() {
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+            
+            let progress = 0;
+            const steps = [
+                'Searching YouTube videos...',
+                'Extracting video metadata...',
+                'Calculating relevance scores...',
+                'Generating study materials...',
+                'Creating NotebookLM format...',
+                'Finalizing output files...'
+            ];
+            
+            const interval = setInterval(() => {
+                if (progress < steps.length) {
+                    document.getElementById('progressText').textContent = steps[progress];
+                    document.getElementById('progressFill').style.width = `${((progress + 1) / steps.length) * 100}%`;
+                    progress++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+        
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+        
+        function showResults(result) {
+            document.getElementById('resultsContainer').style.display = 'block';
+            
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';
+            
+            result.videos.forEach(video => {
+                const item = document.createElement('div');
+                item.className = 'video-item';
+                item.innerHTML = `
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-meta">
+                            ${video.channel} • ${video.views} • ${video.upload_date} • ${video.duration}
+                        </div>
+                    </div>
+                    <div class="relevance-score">${video.relevance_score}/100</div>
+                `;
+                videoList.appendChild(item);
+            });
+            
+            const downloadButtons = document.getElementById('downloadButtons');
+            downloadButtons.innerHTML = `
+                <a href="/download/notebook/${result.session_id}" class="btn-secondary">NotebookLM JSON</a>
+                <a href="/download/videos/${result.session_id}" class="btn-secondary">Videos JSON</a>
+                <a href="/download/summary/${result.session_id}" class="btn-secondary">Summary</a>
+                <a href="/download/briefing/${result.session_id}" class="btn-secondary">Briefing Document</a>
+                <a href="/download/study_guide/${result.session_id}" class="btn-secondary">Study Guide</a>
+                <a href="/download/faq/${result.session_id}" class="btn-secondary">FAQ</a>
+            `;
+        }
+        
+        loadTopics();
+    </script>
+</body>
+</html>

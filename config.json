@@ -1,0 +1,42 @@
+{
+  "predefined_topics": [
+    {
+      "name": "The Law of Action",
+      "keywords": ["principle of least action", "newton's laws", "lagrangian mechanics", "action physics"],
+      "description": "Fundamental principles of action in physics including Newton's laws and the principle of least action"
+    },
+    {
+      "name": "Quantum Mechanics",
+      "keywords": ["quantum physics", "wave function", "uncertainty principle", "quantum entanglement"],
+      "description": "Core concepts in quantum mechanics and quantum physics"
+    },
+    {
+      "name": "Machine Learning",
+      "keywords": ["neural networks", "deep learning", "artificial intelligence", "machine learning algorithms"],
+      "description": "Machine learning algorithms, neural networks, and AI concepts"
+    },
+    {
+      "name": "Calculus",
+      "keywords": ["derivatives", "integrals", "limits", "differential equations"],
+      "description": "Calculus concepts including derivatives, integrals, and applications"
+    },
+    {
+      "name": "Data Structures",
+      "keywords": ["algorithms", "binary trees", "hash tables", "sorting algorithms"],
+      "description": "Computer science data structures and algorithms"
+    }
+  ],
+  "search_settings": {
+    "max_videos": 12,
+    "min_relevance_score": 65,
+    "preferred_channels": [
+      "PBS Space Time",
+      "TED-Ed",
+      "CrashCourse",
+      "Khan Academy",
+      "3Blue1Brown",
+      "Veritasium",
+      "MinutePhysics"
+    ]
+  }
+}
