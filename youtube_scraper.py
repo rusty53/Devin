@@ -18,9 +18,31 @@ class YouTubeScraper:
         
         search_queries = [topic] + keywords
         
-        for query in search_queries[:3]:
+        if "law of action" in topic.lower() or "action" in topic.lower():
+            search_queries.extend([
+                "principle of least action physics",
+                "Newton's laws of motion",
+                "Lagrangian mechanics",
+                "action principle physics",
+                "variational principle physics"
+            ])
+        elif "machine learning" in topic.lower():
+            search_queries.extend([
+                "neural networks explained",
+                "deep learning tutorial",
+                "AI algorithms",
+                "machine learning fundamentals"
+            ])
+        elif "quantum" in topic.lower():
+            search_queries.extend([
+                "quantum mechanics explained",
+                "quantum physics basics",
+                "quantum theory"
+            ])
+        
+        for query in search_queries[:6]:
             try:
-                query_videos = self._search_single_query(query, max_results // 3)
+                query_videos = self._search_single_query(query, max_results // 2)
                 videos.extend(query_videos)
                 time.sleep(random.uniform(1, 3))
             except Exception as e:
@@ -150,28 +172,68 @@ class YouTubeScraper:
     
     def _calculate_relevance_scores(self, videos, keywords, preferred_channels=None):
         for video in videos:
-            score = 50
+            score = 30  # Start lower to allow more differentiation
             
             title_lower = video['title'].lower()
+            
             for keyword in keywords:
                 if keyword.lower() in title_lower:
+                    score += 15
+            
+            educational_terms = ['explained', 'tutorial', 'lesson', 'course', 'introduction', 'basics', 'fundamentals']
+            for term in educational_terms:
+                if term in title_lower:
+                    score += 8
+            
+            physics_terms = ['physics', 'mechanics', 'principle', 'law', 'theory', 'quantum', 'newton']
+            for term in physics_terms:
+                if term in title_lower:
                     score += 10
             
             if preferred_channels and video['channel'] in preferred_channels:
-                score += 15
+                score += 20
             
             views_text = video.get('views', '').lower()
             if 'million' in views_text or 'm views' in views_text:
-                score += 20
+                score += 25
             elif 'thousand' in views_text or 'k views' in views_text:
-                score += 10
+                import re
+                numbers = re.findall(r'(\d+(?:\.\d+)?)', views_text)
+                if numbers:
+                    try:
+                        num = float(numbers[0])
+                        if num >= 500:  # 500K+ views
+                            score += 15
+                        elif num >= 100:  # 100K+ views
+                            score += 10
+                        else:
+                            score += 5
+                    except:
+                        score += 8
+            
+            duration = video.get('duration', '')
+            if duration and ':' in duration:
+                try:
+                    parts = duration.split(':')
+                    if len(parts) == 2:
+                        minutes = int(parts[0])
+                        if 5 <= minutes <= 25:  # Ideal educational length
+                            score += 10
+                        elif minutes > 25:
+                            score += 5
+                except:
+                    pass
             
             upload_date = video.get('upload_date', '').lower()
-            if 'month' in upload_date or 'year' in upload_date:
-                if 'month' in upload_date:
+            if 'month' in upload_date:
+                score += 8
+            elif 'year' in upload_date:
+                if '1 year' in upload_date or '2 year' in upload_date:
+                    score += 12
+                elif '3 year' in upload_date or '4 year' in upload_date:
+                    score += 10
+                else:
                     score += 5
-                elif '1 year' in upload_date or '2 year' in upload_date:
-                    score += 3
             
             video['relevance_score'] = min(score, 100)
         
