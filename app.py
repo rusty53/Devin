@@ -120,4 +120,6 @@ def download_faq(session_id):
     return "File not found", 404
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    import os
+    port = int(os.environ.get('FLASK_RUN_PORT', 5001))
+    app.run(debug=True, host='0.0.0.0', port=port)
