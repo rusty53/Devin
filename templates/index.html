@@ -526,8 +526,11 @@
                 <a href="/download/briefing/${result.session_id}" class="btn-secondary">Briefing Document</a>
                 <a href="/download/study_guide/${result.session_id}" class="btn-secondary">Study Guide</a>
                 <a href="/download/faq/${result.session_id}" class="btn-secondary">FAQ</a>
-                <a href="/download/timeline/${result.session_id}" class="btn-secondary">Timeline & Characters</a>
+                <a href="/download/timeline/${result.session_id}" class="btn-secondary">📅 Timeline & Characters</a>
             `;
+            
+            console.log('Download buttons generated with session ID:', result.session_id);
+            console.log('Timeline button URL:', `/download/timeline/${result.session_id}`);
         }
         
         loadTopics();

@@ -122,6 +122,9 @@ def download_faq(session_id):
 @app.route('/download/timeline/<session_id>')
 def download_timeline(session_id):
     file_path = os.path.join(OUTPUT_DIR, session_id, 'content_timeline_characters.md')
+    print(f"Timeline download requested for session: {session_id}")
+    print(f"Looking for file at: {file_path}")
+    print(f"File exists: {os.path.exists(file_path)}")
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True, download_name='timeline_characters.md')
     return "File not found", 404
