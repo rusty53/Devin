@@ -119,6 +119,13 @@ def download_faq(session_id):
         return send_file(file_path, as_attachment=True, download_name='faq.md')
     return "File not found", 404
 
+@app.route('/download/timeline/<session_id>')
+def download_timeline(session_id):
+    file_path = os.path.join(OUTPUT_DIR, session_id, 'content_timeline_characters.md')
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True, download_name='timeline_characters.md')
+    return "File not found", 404
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('FLASK_RUN_PORT', 5001))
